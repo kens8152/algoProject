@@ -15,21 +15,88 @@ def calculate_metrics(
     config: Dict[str, Any],
     events: List[Dict[str, Any]],
 ) -> Dict[str, Any]:
-    """Return a JSON-serializable dictionary for the chosen performance metric.
+    """Calculate delivery performance from the simulation log."""
 
-    parcels and distances are the rows of the day's CSV files, config is the
-    contents of config.json, and events are the records from the run's log.
-    CSV values are strings, so convert them before calculating. In particular,
-    parcel times are "HH:MM" strings while event times are minutes after
-    midnight: "17:00" is 17 * 60 = 1020.
-    """
+    # Convert a time such as "14:30" into minutes after midnight.
+    def time_to_minutes(time_string):
+        hours, minutes = map(int, time_string.split(":"))
+        return hours * 60 + minutes
 
-    # Illustration only: replace or extend this with your chosen metric.
+    # Store actual delivery times using parcel IDs as dictionary keys.
+    delivery_times = {}
+
+    # Count the number of vehicle trips.
     number_of_trips = 0
+
     for event in events:
-        if event["event_type"] == "hub_departure":
+        if event["event_type"] == "delivery":
+            parcel_id = event["parcel_id"]
+            delivery_times[parcel_id] = float(event["time"])
+
+        elif event["event_type"] == "hub_departure":
             number_of_trips += 1
-    return {"number_of_trips": number_of_trips}
+
+    total_parcels = len(parcels)
+    delivered_parcels = 0
+    on_time_parcels = 0
+    late_parcels = 0
+    early_parcels = 0
+
+    # Check every parcel against its preferred delivery window.
+    for parcel in parcels:
+        parcel_id = parcel["parcel_id"]
+
+        # Parcels without delivery events are undelivered.
+        if parcel_id not in delivery_times:
+            continue
+
+        delivered_parcels += 1
+
+        actual_time = delivery_times[parcel_id]
+
+        window_start = time_to_minutes(
+            parcel["delivery_window_start"]
+        )
+        window_end = time_to_minutes(
+            parcel["delivery_window_end"]
+        )
+
+        if window_start <= actual_time <= window_end:
+            on_time_parcels += 1
+
+        elif actual_time < window_start:
+            early_parcels += 1
+
+        else:
+            late_parcels += 1
+
+    undelivered_parcels = total_parcels - delivered_parcels
+
+    # Avoid division by zero if a dataset has no parcels.
+    if total_parcels > 0:
+        on_time_delivery_rate = (
+            on_time_parcels / total_parcels
+        ) * 100
+
+        delivery_completion_rate = (
+            delivered_parcels / total_parcels
+        ) * 100
+    else:
+        on_time_delivery_rate = 0.0
+        delivery_completion_rate = 0.0
+
+    return {
+        "on_time_delivery_rate": round(on_time_delivery_rate, 2),
+        "delivery_completion_rate": round(delivery_completion_rate, 2),
+        "total_parcels": total_parcels,
+        "delivered_parcels": delivered_parcels,
+        "on_time_parcels": on_time_parcels,
+        "early_parcels": early_parcels,
+        "late_parcels": late_parcels,
+        "undelivered_parcels": undelivered_parcels,
+        "number_of_trips": number_of_trips,
+    }
+
 
 
 def main(argv: Optional[List[str]] = None) -> int:
