@@ -1,0 +1,11 @@
+{
+  "on_time_delivery_rate": 0.6612296110414053,
+  "delivery_completion_rate": 0.9598494353826851,
+  "total_parcels": 797,
+  "delivered_parcels": 765,
+  "on_time_deliveries": 527,
+  "early_deliveries": 171,
+  "late_deliveries": 67,
+  "undelivered_parcels": 32,
+  "number_of_trips": 35
+}

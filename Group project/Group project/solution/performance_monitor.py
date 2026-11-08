@@ -72,30 +72,27 @@ def calculate_metrics(
 
     undelivered_parcels = total_parcels - delivered_parcels
 
+    
     # Avoid division by zero if a dataset has no parcels.
     if total_parcels > 0:
-        on_time_delivery_rate = (
-            on_time_parcels / total_parcels
-        ) * 100
-
-        delivery_completion_rate = (
-            delivered_parcels / total_parcels
-        ) * 100
+        on_time_delivery_rate = on_time_parcels / total_parcels
+        delivery_completion_rate = delivered_parcels / total_parcels
     else:
         on_time_delivery_rate = 0.0
         delivery_completion_rate = 0.0
 
     return {
-        "on_time_delivery_rate": round(on_time_delivery_rate, 2),
-        "delivery_completion_rate": round(delivery_completion_rate, 2),
+        "on_time_delivery_rate": on_time_delivery_rate,
+        "delivery_completion_rate": delivery_completion_rate,
         "total_parcels": total_parcels,
         "delivered_parcels": delivered_parcels,
-        "on_time_parcels": on_time_parcels,
-        "early_parcels": early_parcels,
-        "late_parcels": late_parcels,
+        "on_time_deliveries": on_time_parcels,
+        "early_deliveries": early_parcels,
+        "late_deliveries": late_parcels,
         "undelivered_parcels": undelivered_parcels,
         "number_of_trips": number_of_trips,
     }
+
 
 
 
@@ -138,3 +135,59 @@ def main(argv: Optional[List[str]] = None) -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
+
+
+def _to_minutes(hhmm):
+    """Convert demand CSV HH:MM strings to minutes after midnight."""
+    hours, minutes = str(hhmm).split(":")
+    return 60 * int(hours) + int(minutes)
+
+
+def calculate_metrics(parcels, distances, config, events):
+    """Count on-time deliveries out of ALL parcels in a day, not just delivered.
+
+    The simulator's 'delivery' events contain parcel_id and delivery time.
+    The CSV records contain the preferred window start/end as HH:MM strings.
+    Both window endpoints are inclusive. Early, late, and undelivered do NOT
+    count as on time. Secondary counts help diagnose policy performance.
+    """
+    delivery_times = {}
+    for event in events:
+        if event["event_type"] == "delivery":
+            parcel_id = event["parcel_id"]
+            if parcel_id in delivery_times:
+                raise ValueError("Duplicate delivery event for " + str(parcel_id))
+            delivery_times[parcel_id] = float(event["time"])
+
+    on_time = 0
+    early = 0
+    late = 0
+    undelivered = 0
+
+    for record in parcels:
+        parcel_id = record["parcel_id"]
+        delivery = delivery_times.get(parcel_id)
+        if delivery is None:
+            undelivered += 1
+            continue
+        start = _to_minutes(record["delivery_window_start"])
+        end = _to_minutes(record["delivery_window_end"])
+        if delivery < start:
+            early += 1
+        elif delivery > end:
+            late += 1
+        else:
+            on_time += 1
+
+    total = len(parcels)
+    delivered = on_time + early + late
+
+    return {
+        "on_time_delivery_rate": on_time / total if total else 0.0,
+        "on_time_deliveries": on_time,
+        "total_parcels": total,
+        "delivered_parcels": delivered,
+        "early_deliveries": early,
+        "late_deliveries": late,
+        "undelivered_parcels": undelivered,
+    }
