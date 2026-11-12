@@ -1,4 +1,4 @@
-# IS115 Project — Nearest-Neighbour Algorithm
+# IS115 Project - Nearest-Neighbour Algorithm
 
 ## Algorithm objective
 
