@@ -8,3 +8,6 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+
+# Temporary CSV from partial experiment runs
+results/summary_selected_runs.csv
