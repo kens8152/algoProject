@@ -1,4 +1,4 @@
-"""Run the course simulator + performance monitor for baseline/NN, 20 days.
+"""Run the course simulator + performance monitor for all four policies, 20 days.
 
 Run from the project root:
     python scripts/run_experiments.py
@@ -17,6 +17,8 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 POLICIES = {
     "baseline": "solution.policies.baseline",
+    "edf": "solution.policies.edf",
+    "urgency_score": "solution.policies.urgency_score",
     "nearest_neighbor": "solution.policies.nearest_neighbor",
 }
 
@@ -30,7 +32,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run IS115 policy comparisons")
     parser.add_argument(
         "--policies", nargs="+", choices=sorted(POLICIES),
-        default=["baseline", "nearest_neighbor"],
+        default=list(POLICIES),
     )
     parser.add_argument("--start-day", type=int, default=1)
     parser.add_argument("--end-day", type=int, default=20)
@@ -63,6 +65,7 @@ def main():
                 "policy": policy_name,
                 "day": day,
                 "on_time_delivery_rate": metric["on_time_delivery_rate"],
+                "delivery_completion_rate": metric["delivery_completion_rate"],
                 "on_time_deliveries": metric["on_time_deliveries"],
                 "total_parcels": metric["total_parcels"],
                 "delivered_parcels": metric["delivered_parcels"],
@@ -71,7 +74,8 @@ def main():
                 "undelivered_parcels": metric["undelivered_parcels"],
             })
 
-    filename = results_root / "summary_nearest_neighbor.csv"
+    full_run = (set(args.policies) == set(POLICIES) and args.start_day == 1 and args.end_day == 20)
+    filename = results_root / ("summary_all_policies.csv" if full_run else "summary_selected_runs.csv")
     with filename.open("w", newline="", encoding="utf-8") as stream:
         writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
         writer.writeheader()
@@ -84,10 +88,11 @@ def main():
         all_parcels = sum(int(row["total_parcels"]) for row in policy_rows)
         all_on_time = sum(int(row["on_time_deliveries"]) for row in policy_rows)
         weighted = all_on_time / all_parcels if all_parcels else 0.0
+        completion = statistics.mean(float(row["delivery_completion_rate"]) for row in policy_rows)
         print(
-            "{}: mean daily OTDR = {:.2f}%; pooled OTDR = {:.2f}% "
+            "{}: mean daily OTDR = {:.2f}%; completion = {:.2f}%; pooled OTDR = {:.2f}% "
             "(on-time {} / total {})".format(
-                policy, 100 * statistics.mean(rate_by_day),
+                policy, 100 * statistics.mean(rate_by_day), 100 * completion,
                 100 * weighted, all_on_time, all_parcels
             )
         )

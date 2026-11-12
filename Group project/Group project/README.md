@@ -86,7 +86,21 @@ To test another algorithm, replace `urgency_score` with one of the following pol
 
 ### 4.3 Running All Four Algorithms Across 20 Days
 
-The following PowerShell script runs all four algorithms across the 20 simulation days and calculates their performance metrics.
+Run the Python experiment script from the project root to test all four policies over all 20 days and regenerate the combined summary:
+
+```powershell
+python scripts/run_experiments.py
+```
+
+For a smaller test, specify the policies and day range, for example:
+
+```powershell
+python scripts/run_experiments.py --policies edf urgency_score --start-day 1 --end-day 1
+```
+
+A partial run writes `results/summary_selected_runs.csv` instead of replacing the official combined summary. The full run writes `results/summary_all_policies.csv`. The script also prints the mean daily OTDR and completion rate for each selected policy.
+
+Alternatively, the following PowerShell script runs all four algorithms across the 20 simulation days and calculates their performance metrics.
 
 ```powershell
 $policies = @("baseline", "edf", "urgency_score", "nearest_neighbor")
