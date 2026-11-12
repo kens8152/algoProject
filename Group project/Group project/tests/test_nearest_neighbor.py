@@ -6,7 +6,7 @@ import copy
 import unittest
 
 from solution.policies.nearest_neighbor import dispatch
-from docs.performance_monitor_function import calculate_metrics
+from solution.performance_monitor import calculate_metrics
 
 
 def example_distances():

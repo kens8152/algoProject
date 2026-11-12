@@ -50,9 +50,6 @@ scripts/
 tests/
     test_nearest_neighbor.py
 
-docs/
-    performance_monitor_function.py
-
 README.md
 
 Each algorithm has a results folder containing 20 subfolders, from `day_001` to `day_020`.
