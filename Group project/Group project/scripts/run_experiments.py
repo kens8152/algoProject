@@ -1,9 +1,8 @@
-"""Run the course simulator + performance monitor for all four policies, 20 days.
+"""run the course simulator plus performance monitor for all four policies for 20 days.
 
-Run from the project root:
-    python scripts/run_experiments.py
+Run from the project root: python scripts/run_experiments.py
 
-Uses only Python's standard library. Requires the original course project files.
+use only Python standard library, requires the original course project files.
 """
 
 import argparse

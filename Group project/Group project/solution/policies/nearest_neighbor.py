@@ -1,13 +1,13 @@
-"""Nearest-neighbour dispatch policy for the IS115 last-mile simulator.
+"""
+EPS is a very small number that helps prevent decimal rounding errors. 
+use it when checking vehicle capacity, travel distance and return time so that a 
+parcel isn't rejected just because of a tiny calculation difference.
 
-Uses ONLY the read-only `parcel` and `context` dictionaries passed to dispatch.
-Does not modify the simulator, the supplied baseline, or the input data.
-
-Route construction: start at HUB, repeatedly append the geographically closest
+Route construction starts at HUB, repeatedly append the closest
 currently unassigned parcel whose inclusion would still permit a valid round
-trip. Depart whenever at least one parcel is feasible; otherwise return [].
+trip based on geography promximity. Depart whenever at least one parcel is feasible, if not return [].
 
-The objective of this comparison policy is route proximity, NOT deadlines.
+Objective of this comparison policy is route proximity, not deadlines.
 Window end is used only to break exact distance ties.
 """
 
@@ -17,9 +17,9 @@ EPS = 1e-9
 def dispatch(parcel, context):
     """Return an ordered list of parcel IDs for the current vehicle.
 
-    Time: O(m + n^2), where m is the number of arrived parcels in `parcel` and
+    time: O(m + n^2), where m is the number of arrived parcels in `parcel` and
     n is the number of available/unassigned parcels (n <= m).
-    Extra space: O(n). The supplied distance matrix is not copied.
+    exxtra space: O(n). The supplied distance matrix is not copied.
     """
     current_time = float(context["current_time"])
     departure_time = current_time + float(context["departure_delay"])
