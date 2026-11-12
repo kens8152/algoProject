@@ -19,7 +19,9 @@ Our project includes four dispatch policies:
 - **Urgency Score:** Prioritises parcels based on estimated arrival times and preferred delivery windows.
 - **Nearest Neighbour:** Selects the nearest feasible parcel when constructing a delivery route.
 
-## 3. Project Structure, algorithms are implemented in the solution/policies/ folder
+## 3. Project Structure
+
+The dispatch algorithms are implemented in `solution/policies/`.
 
 data/
    Input datasets for the 20 simulation days
@@ -41,6 +43,15 @@ results/
     urgency_score/
     nearest_neighbor/
     summary_all_policies.csv
+
+scripts/
+    run_experiments.py
+
+tests/
+    test_nearest_neighbor.py
+
+docs/
+    performance_monitor_function.py
 
 README.md
 
@@ -129,32 +140,6 @@ This generates 80 simulation runs in total.
 
 Running the script again with the same output paths may overwrite existing results.
 
-### 4.4 Generating the Combined Results CSV
-
-The following PowerShell script combines the metrics from all 80 simulation runs into one CSV file.
-
-```powershell
-$policies = @("baseline", "edf", "urgency_score", "nearest_neighbor")
-
-$rows = foreach ($policy in $policies) {
-    1..20 | ForEach-Object {
-        $day = "day_{0:D3}" -f $_
-        $metrics = Get-Content "results/$policy/$day/metrics.json" | ConvertFrom-Json
-
-        [PSCustomObject]@{
-            policy = $policy
-            day = $day
-            on_time_delivery_rate = $metrics.on_time_delivery_rate
-            delivery_completion_rate = $metrics.delivery_completion_rate
-            total_parcels = $metrics.total_parcels
-            delivered_parcels = $metrics.delivered_parcels
-        }
-    }
-}
-
-$rows | Export-Csv "results/summary_all_policies.csv" -NoTypeInformation
-```
-
 ## 5. Performance Metrics
 
 We used two metrics to compare the algorithms.
@@ -202,6 +187,6 @@ The results for each simulation day can be found in `results/summary_all_policie
 
 We used the same simulator, datasets and performance monitor to evaluate all four algorithms.
 
-To check reproducibility, we reran each algorithm on `day_001` and compared the new metrics against the original results. All four algorithms produced matching Day 1 results.
+To check reproducibility, we reran all four algorithms across all 20 days using `python scripts/run_experiments.py`. The regenerated average daily OTDR and completion rates matched the results reported in Section 6.
 
-The commands in Section 4 can be used to reproduce the full set of results, and the final report contains a more detailed discussion of our algorithms, time complexity, experimental results and limitations.
+The commands in Section 4 can be used to reproduce the full set of results. The project report provides a more detailed discussion of the algorithms, time complexity, experimental results and limitations.
