@@ -1,4 +1,4 @@
-"""Run one day's parcel deliveries using a selectable dispatch policy."""
+"""Run one days parcel deliveries using a selectable dispatch policy."""
 
 import argparse
 import copy

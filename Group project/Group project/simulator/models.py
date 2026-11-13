@@ -1,6 +1,6 @@
 """Define input records, dispatch snapshots and immutable simulation events.
 
-Absolute times are minutes after midnight; distances are kilometres.
+Absolute times are minutes after midnight, distances are kilometres.
 """
 
 from dataclasses import dataclass

@@ -1,6 +1,6 @@
-"""Load and validate parcel, distance and fleet input files.
+"""load and validate parcel, distance and fleet input files.
 
-Invalid input values raise ValueError; file access errors propagate as OSError.
+Invalid input values raise ValueError, file access errors propagate as OSError.
 """
 
 import csv

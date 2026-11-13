@@ -168,6 +168,8 @@ EDF:               17.99%, 52.32% (Average OTDR, Average Completion Rate)
 Urgency Score:     29.88%, 35.83% (Average OTDR, Average Completion Rate)
 Nearest Neighbour: **64.84%, 96.00%** (Average OTDR, Average Completion Rate)
 
+The figures above represent the arithmetic mean of the 20 daily rates. The project report uses pooled rates calculated from total parcel counts across all days, which may differ slightly from the daily averages.
+
 ### 6.1 Observations
 
 Nearest Neighbour achieved the highest OTDR and completion rate among the four algorithms.
